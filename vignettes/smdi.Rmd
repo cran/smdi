@@ -1,0 +1,45 @@
+---
+title: "Get started with smdi"
+author: "Janick Weberpals"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Get started with smdi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dpi = 150,
+  fig.width = 6,
+  fig.height = 4.5
+  )
+```
+
+```{r setup}
+library(smdi)
+library(gt)
+```
+
+# `smdi_diagnose()` - the flagship function
+
+The `smdi` main function is `smdi_diagnose()` which calls all three group diagnostics, all of which are also accessible individually. 
+
+`smdi_diagnose()` builds on theoretical concepts developed and validated in a comprehensive simulation study based on the [workstream:](https://www.sentinelinitiative.org/methods-data-tools/methods/approaches-handling-partially-observed-confounder-data-electronic-health)
+
+**Approaches to Handling Partially Observed Confounder Data From Electronic Health Records (EHR) In Non-randomized Studies of Medication Outcomes**.
+
+A most minimal example could look like this (if you want to accept all of the default parameters).
+
+```{r}
+smdi_diagnose(
+  data = smdi_data,
+  covar = NULL, # NULL includes all covariates with at least one NA
+  model = "cox",
+  form_lhs = "Surv(eventtime, status)"
+  ) %>% 
+  smdi_style_gt()
+```
+
