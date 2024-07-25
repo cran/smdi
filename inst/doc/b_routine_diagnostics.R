@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -7,22 +7,24 @@ knitr::opts_chunk$set(
   fig.height = 4.5
   )
 
-## ----setup--------------------------------------------------------------------
+## ----setup, message=FALSE-----------------------------------------------------
 library(smdi)
 library(gt)
-suppressPackageStartupMessages(library(dplyr))
+library(dplyr)
+library(here)
+library(knitr)
 
-## ---- fig-group_diagnostics, fig.cap = "Overview three group diagnostics", echo = FALSE----
-knitr::include_graphics(here::here("vignettes", "smdi_diagnose_table.png"))
+## ----fig-group_diagnostics, fig.cap = "Overview three group diagnostics", echo = FALSE----
+include_graphics(here("vignettes", "smdi_diagnose_table.png"))
 
-## ---- fig-guidance, fig.cap = "Example of how `smdi` diagnostics can be applied to give insights into the likelihood of underlying missingness structures in a real-world database study.", echo = FALSE----
-knitr::include_graphics(here::here("vignettes", "smdi_examples.png"))
+## ----fig-guidance, fig.cap = "Example of how `smdi` diagnostics can be applied to give insights into the likelihood of underlying missingness structures in a real-world database study.", echo = FALSE----
+include_graphics(here("vignettes", "smdi_examples.png"))
 
 ## -----------------------------------------------------------------------------
 smdi_data %>% 
-  dplyr::glimpse()
+  glimpse()
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  # dataset with simulated missingness
 #  ?smdi::smdi_data()
 #  
@@ -47,7 +49,7 @@ smdi_data %>%
 ## -----------------------------------------------------------------------------
 smdi::gg_miss_upset(data = smdi_data)
 
-## ---- fig.width = 8, fig.height=6, fig.width = 10-----------------------------
+## ----fig.width = 8, fig.height=6, fig.width = 10------------------------------
 smdi::md.pattern(smdi_data[, c(covars_missing)], plot = FALSE)
 
 ## -----------------------------------------------------------------------------
@@ -81,7 +83,7 @@ auc <- smdi_rf(data = smdi_data)
 auc$ecog_cat$rf_table
 auc$ecog_cat$rf_plot
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ?smdi::smdi_outcome()
 
 ## -----------------------------------------------------------------------------
@@ -110,7 +112,7 @@ library(gt)
 
 smdi_style_gt(diagnostics)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  gtsave(
 #    data = smdi_style_gt(diagnostics),
 #    filename = "smdi_table.docx", # name of the final .docx file

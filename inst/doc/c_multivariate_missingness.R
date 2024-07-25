@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -12,7 +12,7 @@ library(smdi)
 library(gt)
 suppressPackageStartupMessages(library(dplyr))
 
-## ---- fig.cap="Illustrating missing indicator variable generation within `smdi` functions"----
+## ----fig.cap="Illustrating missing indicator variable generation within `smdi` functions"----
 smdi_data %>% 
   smdi_na_indicator(
     drop_NA_col = FALSE # usually TRUE, but for demonstration purposes set to FALSE
@@ -28,6 +28,9 @@ smdi_data %>%
 ## -----------------------------------------------------------------------------
 # we simulatea monotone missingness pattern
 # following an MCAR mechanism
+
+set.seed(42)
+
 data_monotone <- smdi_data_complete %>% 
   mutate(
     lab1 = rnorm(nrow(smdi_data_complete), mean = 5, sd = 0.5),
@@ -51,11 +54,11 @@ diagnostics_jointly <- smdi_diagnose(
   form_lhs = "Surv(eventtime, status)"
   )
 
-## ---- fig.cap="Diagnostics of lab 1 if analyzed separately."------------------
+## ----fig.cap="Diagnostics of lab 1 if analyzed separately."-------------------
 diagnostics_jointly %>% 
   smdi_style_gt()
 
-## ---- fig.cap="Diagnostics of lab 1 if analyzed separately."------------------
+## ----fig.cap="Diagnostics of lab 1 if analyzed separately."-------------------
 # lab 1
 lab1_diagnostics <- smdi_diagnose(
   data = data_monotone %>% select(-lab2),
@@ -66,7 +69,7 @@ lab1_diagnostics <- smdi_diagnose(
 lab1_diagnostics %>% 
   smdi_style_gt()
 
-## ---- fig.cap="Diagnostics of lab 2 if analyzed separately."------------------
+## ----fig.cap="Diagnostics of lab 2 if analyzed separately."-------------------
 # lab 2
 lab2_diagnostics <- smdi_diagnose(
   data = data_monotone %>% select(-lab1),

@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -8,19 +8,25 @@ knitr::opts_chunk$set(
   fig.height = 4.5
   )
 
-## ----setup--------------------------------------------------------------------
+## ----setup, message=FALSE-----------------------------------------------------
 # basic setup
 library(smdi)
 library(ggplot2)
 library(survival)
 library(gt)
-suppressPackageStartupMessages(library(mice))
-suppressPackageStartupMessages(library(dplyr))
+library(broom)
+library(fastDummies)
+library(survival)
+library(mice)
+library(dplyr)
+library(gridExtra)
+library(tibble)
+library(forcats)
 
 ## -----------------------------------------------------------------------------
 # load complete dataset
 smdi_data_complete <- smdi_data_complete %>% 
-  fastDummies::dummy_columns(
+  dummy_columns(
     select_columns = "ses_cat",
     remove_most_frequent_dummy = TRUE,
     remove_selected_columns = TRUE
@@ -49,7 +55,7 @@ smdi_data_mnar_v <- ampute(
   type = "LEFT"
   )$amp
 
-## ---- warning=FALSE-----------------------------------------------------------
+## ----warning=FALSE------------------------------------------------------------
 # plot
 bind_rows(
   smdi_data_complete %>% select(age_num) %>% mutate(dataset = "Complete"),
@@ -92,15 +98,15 @@ cox_form
 
 ## -----------------------------------------------------------------------------
 # true outcome model
-cox_fit_true <- survival::coxph(cox_form, data = smdi_data_complete) %>% 
-  broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% 
+cox_fit_true <- coxph(cox_form, data = smdi_data_complete) %>% 
+  tidy(exponentiate = TRUE, conf.int = TRUE) %>% 
   filter(term == "exposure") %>% 
   select(term, estimate, conf.low, conf.high, std.error) %>% 
   mutate(analysis = "True estimate")
  
 # complete case analysis
-cox_fit_cc <- survival::coxph(cox_form, data = smdi_data_mnar_v) %>% 
-  broom::tidy(exponentiate = TRUE, conf.int = TRUE) %>% 
+cox_fit_cc <- coxph(cox_form, data = smdi_data_mnar_v) %>% 
+  tidy(exponentiate = TRUE, conf.int = TRUE) %>% 
   filter(term == "exposure") %>% 
   select(term, estimate, conf.low, conf.high, std.error) %>% 
   mutate(analysis = "Complete case analysis")
@@ -112,7 +118,7 @@ cox_fit_imp <- mice(
   print = FALSE
   ) %>%
   with(
-    expr = survival::coxph(formula(paste(format(cox_form), collapse = "")))
+    expr = coxph(formula(paste(format(cox_form), collapse = "")))
     ) %>% 
   pool() %>% 
   summary(conf.int = TRUE, exponentiate = TRUE) %>% 
@@ -122,7 +128,7 @@ cox_fit_imp <- mice(
 
 forest <- bind_rows(cox_fit_true, cox_fit_cc, cox_fit_imp) %>% 
   mutate(analysis = factor(analysis, levels = c("True estimate", "Complete case analysis", "Multiple imputation"))) %>% 
-  ggplot(aes(y = forcats::fct_rev(analysis))) +
+  ggplot(aes(y = fct_rev(analysis))) +
   geom_point(aes(x = estimate), shape = 15, size = 3) +
   geom_errorbar(aes(xmin = conf.low, xmax = conf.high)) +
   geom_vline(xintercept = cox_fit_true[["estimate"]], linetype = "dashed") +
@@ -132,11 +138,11 @@ forest <- bind_rows(cox_fit_true, cox_fit_cc, cox_fit_imp) %>%
 table <- bind_rows(cox_fit_true, cox_fit_cc, cox_fit_imp) %>% 
   select(-term) %>% 
   relocate(analysis, .before = estimate) %>% 
-  mutate(across(tidyselect::where(is.numeric), ~round(.x, 2)))
+  mutate(across(where(is.numeric), ~round(.x, 2)))
 
-gridExtra::grid.arrange(gridExtra::tableGrob(table, rows = NULL), forest)
+grid.arrange(tableGrob(table, rows = NULL), forest)
 
-## ---- echo=FALSE, eval=FALSE--------------------------------------------------
+## ----echo=FALSE, eval=FALSE---------------------------------------------------
 #  # compute the conditional mean difference in age
 #  # between dataset with complete observations
 #  # and dataset with partially observed age covariate
@@ -147,10 +153,10 @@ gridExtra::grid.arrange(gridExtra::tableGrob(table, rows = NULL), forest)
 #    smdi_data_mnar_v %>% mutate(complete_dataset = 0)
 #    )
 #  
-#  cond_mean_diff <- stats::lm(lm_form, data = data_combined)$coefficients[["complete_dataset"]]
+#  cond_mean_diff <- lm(lm_form, data = data_combined)$coefficients[["complete_dataset"]]
 #  cond_mean_diff
 
-## ---- fig.width=6-------------------------------------------------------------
+## ----fig.width=6--------------------------------------------------------------
 # initialize method vector
 method_vector <- rep("", ncol(smdi_data_mnar_v))
 
@@ -174,7 +180,7 @@ narfcs_modeled <- function(i){
     print = FALSE
     ) %>% 
     with(
-      expr = survival::coxph(formula(paste(format(cox_form), collapse = "")))
+      expr = coxph(formula(paste(format(cox_form), collapse = "")))
       ) %>% 
     pool() %>% 
     summary(conf.int = TRUE, exponentiate = TRUE) %>% 
@@ -191,7 +197,7 @@ narfcs_range <- lapply(
 
 narfcs_range_df <- do.call(rbind, narfcs_range)
 
-reference_lines <- tibble::tibble(
+reference_lines <- tibble(
   yintercept = c(cox_fit_true[[2]]),
   Reference = c("TRUE HR"),
   color = c("darkgreen")
@@ -211,14 +217,14 @@ narfcs_range_df %>%
   theme(legend.position="top")
 
 ## -----------------------------------------------------------------------------
-smdi::smdi_data %>% 
-  smdi::smdi_summarize()
+smdi_data %>% 
+  smdi_summarize()
 
 ## -----------------------------------------------------------------------------
 # we one hot encode the `ses_cat` variable again 
 # in the smdi_data dataset
-smdi_data <- smdi::smdi_data %>% 
-  fastDummies::dummy_columns(
+smdi_data <- smdi_data %>% 
+  dummy_columns(
     select_columns = "ses_cat",
     remove_most_frequent_dummy = TRUE,
     remove_selected_columns = TRUE
@@ -253,7 +259,7 @@ narfcs_modeled <- function(i){
     print = FALSE
     ) %>%
     with(
-      expr = survival::coxph(formula(paste(format(cox_form), collapse = "")))
+      expr = coxph(formula(paste(format(cox_form), collapse = "")))
       ) %>%
     pool() %>%
     summary(conf.int = TRUE, exponentiate = TRUE) %>%
@@ -270,7 +276,7 @@ narfcs_range <- lapply(
 
 narfcs_range_df <- do.call(rbind, narfcs_range)
 
-reference_lines <- tibble::tibble(
+reference_lines <- tibble(
   yintercept = c(cox_fit_true[[2]]),
   Reference = c("TRUE HR"),
   color = c("darkgreen")

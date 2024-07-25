@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -364,12 +364,22 @@ all of the default parameters).</p>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="fu">smdi_style_gt</span>()</span></code></pre></div>
 <div id="ralebyeygu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>html {
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+<style>#ralebyeygu table {
+font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+#ralebyeygu thead, #ralebyeygu tbody, #ralebyeygu tfoot, #ralebyeygu tr, #ralebyeygu td, #ralebyeygu th {
+border-style: none;
+}
+#ralebyeygu p {
+margin: 0;
+padding: 0;
 }
 #ralebyeygu .gt_table {
 display: table;
 border-collapse: collapse;
+line-height: normal;
 margin-left: auto;
 margin-right: auto;
 color: #333333;
@@ -391,17 +401,6 @@ border-left-style: none;
 border-left-width: 2px;
 border-left-color: #D3D3D3;
 }
-#ralebyeygu .gt_heading {
-background-color: #FFFFFF;
-text-align: center;
-border-bottom-color: #FFFFFF;
-border-left-style: none;
-border-left-width: 1px;
-border-left-color: #D3D3D3;
-border-right-style: none;
-border-right-width: 1px;
-border-right-color: #D3D3D3;
-}
 #ralebyeygu .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
@@ -421,12 +420,23 @@ border-bottom-width: 0;
 color: #333333;
 font-size: 85%;
 font-weight: initial;
-padding-top: 0;
-padding-bottom: 6px;
+padding-top: 3px;
+padding-bottom: 5px;
 padding-left: 5px;
 padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
+}
+#ralebyeygu .gt_heading {
+background-color: #FFFFFF;
+text-align: center;
+border-bottom-color: #FFFFFF;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
 }
 #ralebyeygu .gt_bottom_border {
 border-bottom-style: solid;
@@ -493,6 +503,9 @@ padding-bottom: 5px;
 overflow-x: hidden;
 display: inline-block;
 width: 100%;
+}
+#ralebyeygu .gt_spanner_row {
+border-bottom-style: hidden;
 }
 #ralebyeygu .gt_group_heading {
 padding-top: 8px;
@@ -585,6 +598,9 @@ vertical-align: top;
 #ralebyeygu .gt_row_group_first td {
 border-top-width: 2px;
 }
+#ralebyeygu .gt_row_group_first th {
+border-top-width: 2px;
+}
 #ralebyeygu .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
@@ -628,6 +644,15 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #D3D3D3;
 }
+#ralebyeygu .gt_last_grand_summary_row_top {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: double;
+border-bottom-width: 6px;
+border-bottom-color: #D3D3D3;
+}
 #ralebyeygu .gt_striped {
 background-color: rgba(128, 128, 128, 0.05);
 }
@@ -655,8 +680,8 @@ border-right-color: #D3D3D3;
 #ralebyeygu .gt_footnote {
 margin: 0px;
 font-size: 90%;
-padding-left: 4px;
-padding-right: 4px;
+padding-top: 4px;
+padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
@@ -703,10 +728,9 @@ font-style: italic;
 font-size: 65%;
 }
 #ralebyeygu .gt_footnote_marks {
-font-style: italic;
-font-weight: normal;
 font-size: 75%;
 vertical-align: 0.4em;
+position: initial;
 }
 #ralebyeygu .gt_asterisk {
 font-size: 100%;
@@ -728,16 +752,15 @@ text-indent: 20px;
 text-indent: 25px;
 }
 </style>
-<table class="gt_table">
-  
-  <thead class="gt_col_headings">
-    <tr>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Covariate">Covariate</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="ASMD (min/max)&lt;sup class=&quot;gt_footnote_marks&quot;&gt;1&lt;/sup&gt;">ASMD (min/max)<sup class="gt_footnote_marks">1</sup></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="p Hotelling&lt;sup class=&quot;gt_footnote_marks&quot;&gt;1&lt;/sup&gt;">p Hotelling<sup class="gt_footnote_marks">1</sup></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="AUC&lt;sup class=&quot;gt_footnote_marks&quot;&gt;2&lt;/sup&gt;">AUC<sup class="gt_footnote_marks">2</sup></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="beta univariate (95% CI)&lt;sup class=&quot;gt_footnote_marks&quot;&gt;3&lt;/sup&gt;">beta univariate (95% CI)<sup class="gt_footnote_marks">3</sup></th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="beta (95% CI)&lt;sup class=&quot;gt_footnote_marks&quot;&gt;3&lt;/sup&gt;">beta (95% CI)<sup class="gt_footnote_marks">3</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="ASMD (min/max)&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;">ASMD (min/max)<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="p Hotelling&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/span&gt;">p Hotelling<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="AUC&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/span&gt;">AUC<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>2</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="beta univariate (95% CI)&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/span&gt;">beta univariate (95% CI)<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>3</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="beta (95% CI)&lt;span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/span&gt;">beta (95% CI)<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>3</sup></span></th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
@@ -766,13 +789,13 @@ text-indent: 25px;
       <td class="gt_footnote" colspan="6"> p little: &lt;.001,  Abbreviations: ASMD = Median absolute standardized mean difference across all covariates, AUC = Area under the curve, beta = beta coefficient, CI = Confidence interval, max = Maximum, min = Minimum</td>
     </tr>
     <tr>
-      <td class="gt_footnote" colspan="6"><sup class="gt_footnote_marks">1</sup> Group 1 diagnostic: Differences in patient characteristics between patients with and without covariate</td>
+      <td class="gt_footnote" colspan="6"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> Group 1 diagnostic: Differences in patient characteristics between patients with and without covariate</td>
     </tr>
     <tr>
-      <td class="gt_footnote" colspan="6"><sup class="gt_footnote_marks">2</sup> Group 2 diagnostic: Ability to predict missingness</td>
+      <td class="gt_footnote" colspan="6"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>2</sup></span> Group 2 diagnostic: Ability to predict missingness</td>
     </tr>
     <tr>
-      <td class="gt_footnote" colspan="6"><sup class="gt_footnote_marks">3</sup> Group 3 diagnostic: Assessment if missingness is associated with the outcome (univariate, adjusted)</td>
+      <td class="gt_footnote" colspan="6"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>3</sup></span> Group 3 diagnostic: Assessment if missingness is associated with the outcome (univariate, adjusted)</td>
     </tr>
   </tfoot>
 </table>

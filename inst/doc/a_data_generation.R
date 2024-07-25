@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -7,19 +7,28 @@ knitr::opts_chunk$set(
   fig.height = 4.5
   )
 
-## ----setup--------------------------------------------------------------------
+## ----setup, message=FALSE-----------------------------------------------------
 library(smdi)
-suppressPackageStartupMessages(library(dplyr))
+library(dplyr)
+library(tibble)
+library(gtsummary)
+library(gt)
+library(survival)
+library(simsurv)
+library(survminer)
+library(usethis)
+library(mice)
+library(cardx)
 
 # some global simulation parameters
 seed_value <- 42
 n <- 2500
 
-## ---- covar_generation--------------------------------------------------------
+## ----covar_generation---------------------------------------------------------
 set.seed(seed_value)
 
 # start with basic dataframe, covariates and their association with exposure
-sim_covar <- tibble::tibble(
+sim_covar <- tibble(
   exposure = rbinom(n = n, size = 1, prob = 0.4),
   age_num = rnorm(n, mean = 64 - 7.5*exposure, sd = 13.7),
   female_cat = rbinom(n, size = 1, prob = 0.39 - 0.05*exposure),
@@ -34,43 +43,43 @@ sim_covar <- tibble::tibble(
   copd_cat = rbinom(n, size = 1, prob = 0.3 + 0.5*smoking_cat)
   ) %>%  
   # bring data in right format
-  dplyr::mutate(across(ends_with("num"), as.numeric)) %>% 
-  dplyr::mutate(across(ends_with("num"), function(x) round(x, digits = 2)))
+  mutate(across(ends_with("num"), as.numeric)) %>% 
+  mutate(across(ends_with("num"), function(x) round(x, digits = 2)))
 
-## ---- distributions_covars----------------------------------------------------
+## ----distributions_covars-----------------------------------------------------
 sim_covar %>% 
-  gtsummary::tbl_summary(by = "exposure") %>% 
-  gtsummary::add_difference()
+  tbl_summary(by = "exposure") %>% 
+  add_difference()
 
-## ---- pr(exposure)_tbl--------------------------------------------------------
-exposure_form <- as.formula(paste("exposure ~ ", paste(colnames(sim_covar %>% dplyr::select(-exposure)), collapse = " + ")))
+## ----pr(exposure)_tbl---------------------------------------------------------
+exposure_form <- as.formula(paste("exposure ~ ", paste(colnames(sim_covar %>% select(-exposure)), collapse = " + ")))
 
-exposure_fit <- stats::glm(
+exposure_fit <- glm(
   exposure_form,
   data = sim_covar,
   family = "binomial"
   )
 
 exposure_fit %>% 
-  gtsummary::tbl_regression(exponentiate = T)
+  tbl_regression(exponentiate = T)
 
-## ---- pr_treatment_assignment, fig.cap="Treatment assignment probabilities."----
+## ----pr_treatment_assignment, fig.cap="Treatment assignment probabilities."----
 # compute propensity score
 exposure_plot <- sim_covar %>% 
-  dplyr::mutate(ps = fitted(exposure_fit))
+  mutate(ps = fitted(exposure_fit))
 
 # plot density
 exposure_plot %>% 
-  ggplot2::ggplot(ggplot2::aes(x = ps, fill = factor(exposure))) +
-  ggplot2::geom_density(alpha = .5) +
-  ggplot2::theme_bw() +
-  ggplot2::labs(
+  ggplot(aes(x = ps, fill = factor(exposure))) +
+  geom_density(alpha = .5) +
+  theme_bw() +
+  labs(
     x = "Pr(exposure)",
     y = "Density",
     fill = "Exposed"
   )
 
-## ---- betas_outcome_generation------------------------------------------------
+## ----betas_outcome_generation-------------------------------------------------
 betas_os <- c(
   exposure = log(1),
   age_num = log(1.05),
@@ -86,16 +95,16 @@ betas_os <- c(
 
 betas_os %>% 
   as.data.frame() %>% 
-  dplyr::transmute(logHR = round(`.`, 2)) %>% 
-  tibble::rownames_to_column(var = "Covariate") %>% 
-  dplyr::mutate(HR = round(exp(logHR), 2)) %>% 
-  gt::gt()
+  transmute(logHR = round(`.`, 2)) %>% 
+  rownames_to_column(var = "Covariate") %>% 
+  mutate(HR = round(exp(logHR), 2)) %>% 
+  gt()
 
-## ---- outcome_generation, message=FALSE---------------------------------------
+## ----outcome_generation, message=FALSE----------------------------------------
 set.seed(seed_value)
 
-sim_df <- sim_covar %>% dplyr::bind_cols(
-  simsurv::simsurv(
+sim_df <- sim_covar %>% bind_cols(
+  simsurv(
     dist = "exponential",
     lambdas = 0.05,
     betas = betas_os,
@@ -103,22 +112,22 @@ sim_df <- sim_covar %>% dplyr::bind_cols(
     maxt = 5 
     )
   ) %>% 
-  dplyr::select(-id)
+  select(-id)
 
-## ---- km_estimates------------------------------------------------------------
-km_overall <- survival::survfit(survival::Surv(eventtime, status) ~ 1, data = sim_df)
-km_exposure <- survival::survfit(survival::Surv(eventtime, status) ~ exposure, data = sim_df)
+## ----km_estimates-------------------------------------------------------------
+km_overall <- survfit(Surv(eventtime, status) ~ 1, data = sim_df)
+km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
 
-gtsummary::tbl_survfit(
+tbl_survfit(
   list(km_overall, km_exposure),
   times = c(1, 5),
   label_header = "**{time} Years**"
   )
 
 ## -----------------------------------------------------------------------------
-km_exposure <- survival::survfit(survival::Surv(eventtime, status) ~ exposure, data = sim_df)
+km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
 
-survminer::ggsurvplot(
+ggsurvplot(
   km_exposure, 
   data = sim_df,
   conf.int = TRUE,
@@ -128,30 +137,30 @@ survminer::ggsurvplot(
   legend.labs = c("Comparator", "Exposure of interest")
   )
 
-## ---- Cox_estimates-----------------------------------------------------------
+## ----Cox_estimates------------------------------------------------------------
 cox_lhs <- "survival::Surv(eventtime, status)"
 cox_rhs <- paste(colnames(sim_covar), collapse = " + ")
 cox_form = as.formula(paste(cox_lhs, "~ exposure +", cox_rhs))
   
-cox_fit <- survival::coxph(cox_form, data = sim_df)
+cox_fit <- coxph(cox_form, data = sim_df)
 
 cox_fit %>% 
-  gtsummary::tbl_regression(exponentiate = T)
+  tbl_regression(exponentiate = T)
 
-## ---- export_complete_data, message=FALSE-------------------------------------
+## ----export_complete_data, message=FALSE--------------------------------------
 smdi_data_complete <- sim_df
-usethis::use_data(smdi_data_complete, overwrite = TRUE)
+use_data(smdi_data_complete, overwrite = TRUE)
 
 ## -----------------------------------------------------------------------------
 # prepare a placeholder df for missing simulation
 # we do not consider ses_cat
 tmp <- smdi_data_complete %>% 
-  dplyr::select(-c(ses_cat))
+  select(-c(ses_cat))
 
 # determine missingness pattern template
 miss_pattern <- rep(1, ncol(tmp))
 
-## ---- mcar--------------------------------------------------------------------
+## ----mcar---------------------------------------------------------------------
 # specify missingness pattern
 # (0 = set to missing, 1 = remains complete)
 mcar_col <- which(colnames(tmp)=="ecog_cat")
@@ -160,21 +169,21 @@ miss_pattern_mcar <- replace(miss_pattern, mcar_col, 0)
 miss_prop_mcar <- .35
 
 set.seed(42)
-smdi_data_mcar <- mice::ampute(
+smdi_data_mcar <- ampute(
   data = tmp,
   prop = miss_prop_mcar,
   mech = "MCAR",
   patterns = miss_pattern_mcar,
   bycases = TRUE
   )$amp %>% 
-  dplyr::select(ecog_cat)
+  select(ecog_cat)
 
 smdi_data_mcar %>% 
-  dplyr::select(ecog_cat) %>% 
-  dplyr::mutate(ecog_cat = forcats::fct_na_value_to_level(factor(ecog_cat), level = "missing")) %>% 
-  gtsummary::tbl_summary()
+  select(ecog_cat) %>% 
+  mutate(ecog_cat = forcats::fct_na_value_to_level(factor(ecog_cat), level = "missing")) %>% 
+  tbl_summary()
 
-## ---- mar---------------------------------------------------------------------
+## ----mar----------------------------------------------------------------------
 # specify missingness pattern
 # (0 = set to missing, 1 = remains complete)
 mar_col <- which(colnames(tmp)=="egfr_cat")
@@ -188,7 +197,7 @@ miss_weights_mar <- replace(miss_weights_mar, mar_col, 0)
 miss_prop_mar <- .4
 
 set.seed(42)
-smdi_data_mar <- mice::ampute(
+smdi_data_mar <- ampute(
   data = tmp,
   prop = miss_prop_mar,
   mech = "MAR",
@@ -199,11 +208,11 @@ smdi_data_mar <- mice::ampute(
   )$amp
 
 smdi_data_mar %>% 
-  dplyr::select(egfr_cat) %>% 
-  dplyr::mutate(egfr_cat = forcats::fct_na_value_to_level(factor(egfr_cat), level = "missing")) %>%
-  gtsummary::tbl_summary()
+  select(egfr_cat) %>% 
+  mutate(egfr_cat = forcats::fct_na_value_to_level(factor(egfr_cat), level = "missing")) %>%
+  tbl_summary()
 
-## ---- create_mnar_v-----------------------------------------------------------
+## ----create_mnar_v------------------------------------------------------------
 # determine missingness pattern
 mnar_v_col <- which(colnames(tmp)=="pdl1_num")
 miss_pattern <- rep(1, ncol(tmp))
@@ -218,7 +227,7 @@ miss_weights_mnar_v <- replace(miss_weights_mnar_v, mnar_v_col, 1)
 miss_prop_mnar_v <- .2
 
 set.seed(42)
-smdi_data_mnar_v <- mice::ampute(
+smdi_data_mnar_v <- ampute(
   data = tmp,
   prop = miss_prop_mnar_v,
   mech = "MNAR",
@@ -229,21 +238,21 @@ smdi_data_mnar_v <- mice::ampute(
   )$amp
 
 smdi_data_mnar_v %>% 
-  dplyr::select(pdl1_num) %>% 
-  gtsummary::tbl_summary()
+  select(pdl1_num) %>% 
+  tbl_summary()
 
 ## -----------------------------------------------------------------------------
 smdi_data <- smdi_data_complete %>% 
-  dplyr::select(-c(ecog_cat, egfr_cat, pdl1_num)) %>% 
-  dplyr::bind_cols(ecog_cat = smdi_data_mcar$ecog_cat, egfr_cat = smdi_data_mar$egfr_cat, pdl1_num = smdi_data_mnar_v$pdl1_num) %>% 
+  select(-c(ecog_cat, egfr_cat, pdl1_num)) %>% 
+  bind_cols(ecog_cat = smdi_data_mcar$ecog_cat, egfr_cat = smdi_data_mar$egfr_cat, pdl1_num = smdi_data_mnar_v$pdl1_num) %>% 
   mutate(across(ends_with("cat"), as.factor))
 
-## ---- distributions_covars_final----------------------------------------------
+## ----distributions_covars_final-----------------------------------------------
 smdi_data %>% 
-  gtsummary::tbl_summary(by = "exposure") %>% 
-  gtsummary::add_overall() %>% 
-  gtsummary::add_difference()
+  tbl_summary(by = "exposure") %>% 
+  add_overall() %>% 
+  add_difference()
 
-## ---- export_missing_data, message=FALSE--------------------------------------
-usethis::use_data(smdi_data, overwrite = TRUE)
+## ----export_missing_data, message=FALSE---------------------------------------
+use_data(smdi_data, overwrite = TRUE)
 
