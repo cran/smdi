@@ -46,10 +46,10 @@ sim_covar <- tibble(
   mutate(across(ends_with("num"), as.numeric)) %>% 
   mutate(across(ends_with("num"), function(x) round(x, digits = 2)))
 
-## ----distributions_covars-----------------------------------------------------
-sim_covar %>% 
-  tbl_summary(by = "exposure") %>% 
-  add_difference()
+## ----distributions_covars, include = FALSE, eval = FALSE----------------------
+#  sim_covar %>%
+#    tbl_summary(by = "exposure") %>%
+#    add_difference()
 
 ## ----pr(exposure)_tbl---------------------------------------------------------
 exposure_form <- as.formula(paste("exposure ~ ", paste(colnames(sim_covar %>% select(-exposure)), collapse = " + ")))
@@ -114,15 +114,22 @@ sim_df <- sim_covar %>% bind_cols(
   ) %>% 
   select(-id)
 
-## ----km_estimates-------------------------------------------------------------
-km_overall <- survfit(Surv(eventtime, status) ~ 1, data = sim_df)
-km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
+## ----km_estimates, include = FALSE, eval = FALSE------------------------------
+#  km_overall <- survfit(Surv(eventtime, status) ~ 1, data = sim_df)
+#  km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
+#  
+#  tbl_survfit(
+#    list(km_overall, km_exposure),
+#    times = c(1, 5),
+#    label_header = "**{time} Years**"
+#    )
 
-tbl_survfit(
-  list(km_overall, km_exposure),
-  times = c(1, 5),
-  label_header = "**{time} Years**"
-  )
+## ----km_estimates2------------------------------------------------------------
+km_overall <- survfit(Surv(eventtime, status) ~ 1, data = sim_df)
+km_overall
+
+km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
+km_exposure
 
 ## -----------------------------------------------------------------------------
 km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
@@ -178,11 +185,6 @@ smdi_data_mcar <- ampute(
   )$amp %>% 
   select(ecog_cat)
 
-smdi_data_mcar %>% 
-  select(ecog_cat) %>% 
-  mutate(ecog_cat = forcats::fct_na_value_to_level(factor(ecog_cat), level = "missing")) %>% 
-  tbl_summary()
-
 ## ----mar----------------------------------------------------------------------
 # specify missingness pattern
 # (0 = set to missing, 1 = remains complete)
@@ -206,11 +208,6 @@ smdi_data_mar <- ampute(
   bycases = TRUE,
   type = "RIGHT"
   )$amp
-
-smdi_data_mar %>% 
-  select(egfr_cat) %>% 
-  mutate(egfr_cat = forcats::fct_na_value_to_level(factor(egfr_cat), level = "missing")) %>%
-  tbl_summary()
 
 ## ----create_mnar_v------------------------------------------------------------
 # determine missingness pattern
@@ -237,21 +234,11 @@ smdi_data_mnar_v <- ampute(
   type = "LEFT"
   )$amp
 
-smdi_data_mnar_v %>% 
-  select(pdl1_num) %>% 
-  tbl_summary()
-
 ## -----------------------------------------------------------------------------
 smdi_data <- smdi_data_complete %>% 
   select(-c(ecog_cat, egfr_cat, pdl1_num)) %>% 
   bind_cols(ecog_cat = smdi_data_mcar$ecog_cat, egfr_cat = smdi_data_mar$egfr_cat, pdl1_num = smdi_data_mnar_v$pdl1_num) %>% 
   mutate(across(ends_with("cat"), as.factor))
-
-## ----distributions_covars_final-----------------------------------------------
-smdi_data %>% 
-  tbl_summary(by = "exposure") %>% 
-  add_overall() %>% 
-  add_difference()
 
 ## ----export_missing_data, message=FALSE---------------------------------------
 use_data(smdi_data, overwrite = TRUE)
