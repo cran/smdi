@@ -143,18 +143,18 @@ table <- bind_rows(cox_fit_true, cox_fit_cc, cox_fit_imp) %>%
 grid.arrange(tableGrob(table, rows = NULL), forest)
 
 ## ----echo=FALSE, eval=FALSE---------------------------------------------------
-#  # compute the conditional mean difference in age
-#  # between dataset with complete observations
-#  # and dataset with partially observed age covariate
-#  lm_form <- as.formula(paste("age_num ~ complete_dataset + exposure + ", paste(covariates[-1], collapse = "+")))
-#  
-#  data_combined <- rbind(
-#    smdi_data_complete %>% mutate(complete_dataset = 1),
-#    smdi_data_mnar_v %>% mutate(complete_dataset = 0)
-#    )
-#  
-#  cond_mean_diff <- lm(lm_form, data = data_combined)$coefficients[["complete_dataset"]]
-#  cond_mean_diff
+# # compute the conditional mean difference in age
+# # between dataset with complete observations
+# # and dataset with partially observed age covariate
+# lm_form <- as.formula(paste("age_num ~ complete_dataset + exposure + ", paste(covariates[-1], collapse = "+")))
+# 
+# data_combined <- rbind(
+#   smdi_data_complete %>% mutate(complete_dataset = 1),
+#   smdi_data_mnar_v %>% mutate(complete_dataset = 0)
+#   )
+# 
+# cond_mean_diff <- lm(lm_form, data = data_combined)$coefficients[["complete_dataset"]]
+# cond_mean_diff
 
 ## ----fig.width=6--------------------------------------------------------------
 # initialize method vector

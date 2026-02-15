@@ -25,11 +25,11 @@ smdi_data %>%
   glimpse()
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  # dataset with simulated missingness
-#  ?smdi::smdi_data()
-#  
-#  # complete dataset
-#  ?smdi::smdi_data_complete()
+# # dataset with simulated missingness
+# ?smdi::smdi_data()
+# 
+# # complete dataset
+# ?smdi::smdi_data_complete()
 
 ## -----------------------------------------------------------------------------
 smdi_data %>% 
@@ -84,7 +84,7 @@ auc$ecog_cat$rf_table
 auc$ecog_cat$rf_plot
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  ?smdi::smdi_outcome()
+# ?smdi::smdi_outcome()
 
 ## -----------------------------------------------------------------------------
 smdi_outcome(
@@ -113,9 +113,9 @@ library(gt)
 smdi_style_gt(diagnostics)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  gtsave(
-#    data = smdi_style_gt(diagnostics),
-#    filename = "smdi_table.docx", # name of the final .docx file
-#    path = "." # path where the file should be stored
-#    )
+# gtsave(
+#   data = smdi_style_gt(diagnostics),
+#   filename = "smdi_table.docx", # name of the final .docx file
+#   path = "." # path where the file should be stored
+#   )
 

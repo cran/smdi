@@ -47,9 +47,9 @@ sim_covar <- tibble(
   mutate(across(ends_with("num"), function(x) round(x, digits = 2)))
 
 ## ----distributions_covars, include = FALSE, eval = FALSE----------------------
-#  sim_covar %>%
-#    tbl_summary(by = "exposure") %>%
-#    add_difference()
+# sim_covar %>%
+#   tbl_summary(by = "exposure") %>%
+#   add_difference()
 
 ## ----pr(exposure)_tbl---------------------------------------------------------
 exposure_form <- as.formula(paste("exposure ~ ", paste(colnames(sim_covar %>% select(-exposure)), collapse = " + ")))
@@ -115,14 +115,14 @@ sim_df <- sim_covar %>% bind_cols(
   select(-id)
 
 ## ----km_estimates, include = FALSE, eval = FALSE------------------------------
-#  km_overall <- survfit(Surv(eventtime, status) ~ 1, data = sim_df)
-#  km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
-#  
-#  tbl_survfit(
-#    list(km_overall, km_exposure),
-#    times = c(1, 5),
-#    label_header = "**{time} Years**"
-#    )
+# km_overall <- survfit(Surv(eventtime, status) ~ 1, data = sim_df)
+# km_exposure <- survfit(Surv(eventtime, status) ~ exposure, data = sim_df)
+# 
+# tbl_survfit(
+#   list(km_overall, km_exposure),
+#   times = c(1, 5),
+#   label_header = "**{time} Years**"
+#   )
 
 ## ----km_estimates2------------------------------------------------------------
 km_overall <- survfit(Surv(eventtime, status) ~ 1, data = sim_df)
